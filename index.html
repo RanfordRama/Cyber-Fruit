@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER-VISION // AI Neural Classifier</title>
+    <!-- Google Fonts: Orbitron (แนวไซเบอร์) และ Prompt (ภาษาไทย) -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome สำหรับไอคอนสุดล้ำ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --panel-bg: rgba(13, 13, 24, 0.85);
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --neon-purple: #b000ff;
+            --text-main: #f1f5f9;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', 'Orbitron', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(176, 0, 255, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 85% 85%, rgba(0, 243, 255, 0.12) 0%, transparent 40%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-main);
+        }
+
+        .cyber-card {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(176, 0, 255, 0.05);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 480px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ตกแต่งมุมตัดสไตล์ไซเบอร์ */
+        .cyber-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            border-width: 0 35px 35px 0;
+            border-style: solid;
+            border-color: var(--neon-cyan) transparent;
+            display: block;
+            width: 0;
+            filter: drop-shadow(-2px 2px 4px rgba(0,243,255,0.5));
+        }
+
+        .header-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .cyber-avatar-box {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--neon-purple));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.4);
+            font-size: 1.6rem;
+            color: #fff;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .title-area h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .title-area p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ซ่อน input file เดิม */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* ปุ่มอัปโหลดสไตล์ Cyber Button */
+        .cyber-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            background: transparent;
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 12px;
+            border-radius: 10px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .cyber-btn:hover:not(.disabled) {
+            background: var(--neon-cyan);
+            color: var(--bg-color);
+            box-shadow: 0 0 25px var(--neon-cyan);
+            transform: translateY(-2px);
+        }
+
+        .cyber-btn.disabled {
+            border-color: #334155;
+            color: #475569;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* พื้นแสดงรูปภาพพรีวิว */
+        .preview-screen {
+            width: 100%;
+            height: 220px;
+            border: 2px dashed rgba(176, 0, 255, 0.4);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            background: rgba(3, 3, 8, 0.6);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .preview-screen img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .placeholder-box {
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .placeholder-box i {
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+            color: var(--neon-pink);
+            text-shadow: 0 0 12px rgba(255, 0, 85, 0.4);
+        }
+
+        .placeholder-box span {
+            font-size: 0.8rem;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        /* ส่วนแสดงผลการพยากรณ์ (Results) */
+        #label-container {
+            margin-top: 10px;
+        }
+
+        .result-card {
+            margin-bottom: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 10px 14px;
+            border-radius: 8px;
+            border-left: 3px solid var(--neon-cyan);
+        }
+
+        .result-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .label-name {
+            color: #fff;
+        }
+
+        .label-score {
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            border-radius: 999px;
+            width: 0%;
+            transition: width 0.4s ease-out;
+            box-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        /* แถบสถานะระบบ */
+        .system-footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--neon-pink);
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 18px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cyber-card">
+        <!-- ส่วนหัวหน้าจอ -->
+        <div class="header-box">
+            <div class="cyber-avatar-box">
+                <i class="fa-solid fa-brain"></i>
+            </div>
+            <div class="title-area">
+                <h1>Neural Image Net</h1>
+                <p>Teachable Machine Uploader Module</p>
+            </div>
+        </div>
+
+        <!-- ปุ่มอัปโหลดไฟล์ -->
+        <label for="imageUpload" id="uploadBtn" class="cyber-btn disabled">
+            <i class="fa-solid fa-spinner fa-spin"></i> Loading Neural Core...
+        </label>
+        <input type="file" id="imageUpload" accept="image/*" onchange="handleImageUpload(event)">
+
+        <!-- กรอบรูปตัวอย่าง -->
+        <div class="preview-screen">
+            <div class="placeholder-box" id="placeholderBox">
+                <i class="fa-solid fa-radar"></i>
+                <span>WAITING FOR TARGET IMAGE</span>
+            </div>
+            <img id="imagePreview" src="" alt="Target Preview">
+        </div>
+
+        <!-- แสดงผลลัพธ์ -->
+        <div id="label-container"></div>
+        
+        <!-- แถบแสดงสถานะ -->
+        <div class="system-footer" id="systemStatus">STATUS: Initializing Model Protocol...</div>
+    </div>
+
+    <!-- TensorFlow.js & Teachable Machine Image Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    
+    <script type="text/javascript">
+        // ลิงก์โมเดล Teachable Machine ของคุณ
+        const URL = "https://teachablemachine.withgoogle.com/models/BEX6nVcT_/";
+
+        let model, labelContainer, maxPredictions;
+
+        // โหลดโมเดลทันทีเมื่อเปิดหน้าเว็บ
+        async function loadModel() {
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            try {
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+
+                // เปลี่ยนสถานะปุ่มเมื่อโหลดเสร็จสมบูรณ์
+                const uploadBtn = document.getElementById("uploadBtn");
+                uploadBtn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Upload Image File';
+                uploadBtn.classList.remove("disabled");
+                
+                document.getElementById("systemStatus").innerText = "STATUS: System Online & Ready";
+                document.getElementById("systemStatus").style.color = "var(--neon-cyan)";
+
+                // สร้างโครงสร้างแถบผลลัพธ์ตามจำนวนคลาสในโมเดล
+                labelContainer = document.getElementById("label-container");
+                labelContainer.innerHTML = "";
+                for (let i = 0; i < maxPredictions; i++) {
+                    const itemDiv = document.createElement("div");
+                    itemDiv.className = "result-card";
+                    itemDiv.innerHTML = `
+                        <div class="result-info">
+                            <span class="label-name">--</span>
+                            <span class="label-score">0.0%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                    `;
+                    labelContainer.appendChild(itemDiv);
+                }
+            } catch (error) {
+                console.error("Error loading model:", error);
+                document.getElementById("uploadBtn").innerText = "Connection Failed";
+                document.getElementById("systemStatus").innerText = "STATUS: Error - Check Browser CORS/Internet";
+            }
+        }
+
+        // ฟังก์ชันจัดการไฟล์รูปภาพที่ผู้ใช้อัปโหลด
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.getElementById("imagePreview");
+                const placeholder = document.getElementById("placeholderBox");
+
+                imgElement.src = e.target.result;
+                imgElement.style.display = "block";
+                placeholder.style.display = "none";
+
+                // เมื่อรูปภาพแสดงบนหน้าจอแล้ว สั่งให้ AI ทำนายผลทันที
+                imgElement.onload = async function() {
+                    document.getElementById("systemStatus").innerText = "STATUS: Analyzing Target...";
+                    await predict(imgElement);
+                    document.getElementById("systemStatus").innerText = "STATUS: Analysis Complete";
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ฟังก์ชันส่งภาพเข้าโมเดลเพื่อวิเคราะห์
+        async function predict(imageElement) {
+            const prediction = await model.predict(imageElement);
+            
+            for (let i = 0; i < maxPredictions; i++) {
+                const className = prediction[i].className;
+                const probability = (prediction[i].probability * 100).toFixed(1);
+
+                const itemDiv = labelContainer.childNodes[i];
+                itemDiv.querySelector(".label-name").innerText = className;
+                itemDiv.querySelector(".label-score").innerText = probability + "%";
+                itemDiv.querySelector(".progress-bar").style.width = probability + "%";
+            }
+        }
+
+        // สั่งโหลดโมเดลตอนหน้าเว็บพร้อม
+        window.onload = loadModel;
+    </script>
+</body>
+</html>
